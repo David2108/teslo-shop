@@ -1,6 +1,9 @@
-import {BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import {BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import { ProductImage } from './product-image-entity';
 
-@Entity()
+// Si se especifica el nombre en entity en la base de datos la tabla se creara
+// con el nombre definido en @Entity y no con el nombre de la clase
+@Entity({name: 'products'})
 export class Product {
  
     @PrimaryGeneratedColumn('uuid')
@@ -46,6 +49,14 @@ export class Product {
         default: []
     })
     tags: string[];
+
+    @OneToMany(
+        // Callback que dice que regresa un ProductImage
+        () => ProductImage,
+        (productImage) => productImage.product,
+        {cascade: true, eager: true}
+    )
+    images?: ProductImage[];
 
     @BeforeInsert()
     private checkSlugInster(){
