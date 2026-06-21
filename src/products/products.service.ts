@@ -4,10 +4,11 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { DataSource, Repository } from 'typeorm';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 import { validate as isUUID } from 'uuid';
 import { ProductImage } from './entities/product-image-entity';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { User } from '../auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -22,7 +23,7 @@ export class ProductsService {
     private readonly dataSouce: DataSource
   ) { }
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User) {
 
     try {
 
@@ -33,7 +34,8 @@ export class ProductsService {
         ...productDetails,
         // Al crear la imagen dentro de la creación del producto, al crear el producto
         // crea las imagenes y le asigna a cada imagen el id del producto
-        images: images.map(image => this.productImageRepository.create({ url: image }))
+        images: images.map(image => this.productImageRepository.create({ url: image })),
+        user
       });
 
       // Guarda en la base de datos los datos de productos y de las images
@@ -100,7 +102,7 @@ export class ProductsService {
     };
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, user: User) {
 
     const { images, ...toUpdate } = updateProductDto;
 
@@ -129,6 +131,7 @@ export class ProductsService {
         product.images = images.map(image => this.productImageRepository.create({ url: image }));
       }
 
+      product.user = user;
       await queryRunner.manager.save(product);
 
       // Confirma los cambios e impacta en la base de datos

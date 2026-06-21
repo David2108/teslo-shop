@@ -1,5 +1,6 @@
-import {BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {BeforeInsert, BeforeUpdate, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
 import { ProductImage } from './product-image-entity';
+import { User } from '../../auth/entities/user.entity';
 
 // Si se especifica el nombre en entity en la base de datos la tabla se creara
 // con el nombre definido en @Entity y no con el nombre de la clase
@@ -57,6 +58,13 @@ export class Product {
         {cascade: true, eager: true}
     )
     images?: ProductImage[];
+    
+    @ManyToMany(
+        () => User,
+        (user) => user.products,
+        {eager: true}
+    )
+    user: User;
 
     @BeforeInsert()
     private checkSlugInster(){
@@ -74,4 +82,5 @@ export class Product {
         .replaceAll(' ', '_')
         .replaceAll("'", '');
     }
+
 }
